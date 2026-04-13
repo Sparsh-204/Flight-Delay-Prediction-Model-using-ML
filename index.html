@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>India Flight Delay Predictor</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap");
+
+    :root {
+      --saffron: #ff7a18;
+      --deep-saffron: #ff5e00;
+      --india-green: #0e8f56;
+      --navy: #07284f;
+      --ink: #0d1b2a;
+      --paper: #f8fbff;
+      --border: rgba(7, 40, 79, 0.18);
+      --muted: #4f5f73;
+      --card-bg: rgba(255, 255, 255, 0.88);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 14%, rgba(255, 122, 24, 0.28), transparent 44%),
+        radial-gradient(circle at 92% 82%, rgba(14, 143, 86, 0.22), transparent 40%),
+        linear-gradient(145deg, #fff9f2 0%, #eef7ff 48%, #ecfff5 100%);
+      display: flex;
+      justify-content: center;
+      padding: 38px 16px 64px;
+    }
+
+    .page {
+      width: min(960px, 100%);
+    }
+
+    .hero {
+      position: relative;
+      margin-bottom: 22px;
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 28px;
+      overflow: hidden;
+      background:
+        linear-gradient(120deg, rgba(255, 122, 24, 0.18), rgba(7, 40, 79, 0.08) 42%, rgba(14, 143, 86, 0.16));
+      box-shadow: 0 14px 34px rgba(7, 40, 79, 0.13);
+      animation: floatIn 0.45s ease-out;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -74px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      border: 24px solid rgba(255, 255, 255, 0.32);
+      transform: rotate(14deg);
+    }
+
+    .eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.9rem, 3.2vw, 2.85rem);
+      line-height: 1.08;
+      margin-bottom: 8px;
+      color: #041932;
+      max-width: 700px;
+    }
+
+    .hero p {
+      font-size: 0.97rem;
+      color: #1d395a;
+      max-width: 650px;
+      line-height: 1.65;
+    }
+
+    .chips {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.74rem;
+      padding: 7px 12px;
+      background: rgba(255, 255, 255, 0.65);
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 20px 40px rgba(5, 26, 52, 0.12);
+      animation: riseIn 0.5s ease-out 0.08s both;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #3e5067;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid rgba(4, 25, 50, 0.18);
+      background: rgba(255, 255, 255, 0.84);
+      border-radius: 11px;
+      padding: 11px 12px;
+      color: #062245;
+      font-size: 0.94rem;
+      font-family: "Poppins", sans-serif;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(14, 143, 86, 0.64);
+      box-shadow: 0 0 0 3px rgba(14, 143, 86, 0.12);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(7, 40, 79, 0.14);
+      margin: 20px 0;
+    }
+
+    .route-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .arrow {
+      color: var(--navy);
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding-top: 22px;
+    }
+
+    button[type="submit"] {
+      margin-top: 22px;
+      width: 100%;
+      border: none;
+      border-radius: 13px;
+      padding: 13px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(90deg, var(--deep-saffron), #ff8c1a 34%, var(--india-green));
+      box-shadow: 0 10px 22px rgba(255, 94, 0, 0.28);
+      position: relative;
+      transition: transform 0.15s ease, filter 0.18s ease;
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-1px);
+      filter: saturate(1.08);
+    }
+
+    button[type="submit"]:active { transform: translateY(0); }
+    button[type="submit"]:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .spinner {
+      display: none;
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    button.loading .spinner { display: block; }
+
+    #error-msg {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid rgba(176, 33, 33, 0.24);
+      border-radius: 11px;
+      background: rgba(244, 48, 48, 0.06);
+      color: #8d1f1f;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      padding: 11px 12px;
+    }
+
+    #result {
+      display: none;
+      margin-top: 18px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 22px;
+      text-align: center;
+      animation: fadeIn 0.35s ease;
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    #result.delayed {
+      border-color: rgba(255, 94, 0, 0.34);
+      background: rgba(255, 115, 0, 0.08);
+    }
+
+    #result.ontime {
+      border-color: rgba(14, 143, 86, 0.36);
+      background: rgba(10, 149, 92, 0.08);
+    }
+
+    .result-verdict {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #07284f;
+    }
+
+    .result-sub {
+      color: #2e4663;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    #prob-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #052447;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .prob-bar-wrap {
+      background: rgba(7, 40, 79, 0.11);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .prob-bar {
+      height: 100%;
+      border-radius: inherit;
+      width: 0;
+      background: linear-gradient(90deg, #0e8f56, #ff7a18);
+      transition: width 0.9s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 820px) {
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .hero, .card { padding: 20px; border-radius: 18px; }
+      .route-row { grid-template-columns: 1fr; }
+      .arrow { padding-top: 0; transform: rotate(90deg); text-align: center; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="eyebrow">Domestic Aviation India</div>
+      <h1>Predict Delay Risk for Indian Flights</h1>
+      <p>
+        Plan smarter travel across India. Enter route and schedule details for flights between major Indian cities and get an instant delay probability estimate.
+      </p>
+      <div class="chips">
+        <span class="chip">Routes: DEL, BOM, BLR, HYD, MAA</span>
+        <span class="chip">Model Output: Delay probability</span>
+        <span class="chip">FastAPI backend connected</span>
+      </div>
+    </header>
+
+    <section class="card">
+      <form id="predict-form" novalidate>
+        <div class="section-label">Flight Date</div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="month">Month</label>
+            <select id="month" name="MONTH" required>
+              <option value="" disabled selected>Select month</option>
+              <option value="1">January</option><option value="2">February</option>
+              <option value="3">March</option><option value="4">April</option>
+              <option value="5">May</option><option value="6">June</option>
+              <option value="7">July</option><option value="8">August</option>
+              <option value="9">September</option><option value="10">October</option>
+              <option value="11">November</option><option value="12">December</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="day">Day</label>
+            <input id="day" name="DAY" type="number" min="1" max="31" placeholder="e.g. 17" required />
+          </div>
+          <div class="field">
+            <label for="dow">Day of Week</label>
+            <select id="dow" name="DAY_OF_WEEK" required>
+              <option value="" disabled selected>Select day</option>
+              <option value="1">Monday</option><option value="2">Tuesday</option>
+              <option value="3">Wednesday</option><option value="4">Thursday</option>
+              <option value="5">Friday</option><option value="6">Saturday</option>
+              <option value="7">Sunday</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="section-label">Indian Route</div>
+        <div class="route-row">
+          <div class="field">
+            <label for="origin">Origin Airport (IATA)</label>
+            <input id="origin" name="ORIGIN_AIRPORT" type="text" maxlength="5" list="india-airports"
+              placeholder="e.g. DEL" style="text-transform:uppercase" required />
+          </div>
+          <span class="arrow">&#10140;</span>
+          <div class="field">
+            <label for="dest">Destination Airport (IATA)</label>
+            <input id="dest" name="DESTINATION_AIRPORT" type="text" maxlength="5" list="india-airports"
+              placeholder="e.g. BOM" style="text-transform:uppercase" required />
+          </div>
+        </div>
+
+        <datalist id="india-airports">
+          <option value="DEL">Delhi</option>
+          <option value="BOM">Mumbai</option>
+          <option value="BLR">Bengaluru</option>
+          <option value="HYD">Hyderabad</option>
+          <option value="MAA">Chennai</option>
+          <option value="CCU">Kolkata</option>
+          <option value="COK">Kochi</option>
+          <option value="GOI">Goa</option>
+          <option value="PNQ">Pune</option>
+          <option value="AMD">Ahmedabad</option>
+          <option value="JAI">Jaipur</option>
+          <option value="LKO">Lucknow</option>
+        </datalist>
+
+        <hr class="divider" />
+
+        <div class="section-label">Flight Details</div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="airline">Indian Airline</label>
+            <select id="airline" name="AIRLINE" required>
+              <option value="" disabled selected>Select airline</option>
+              <option value="6E">6E - IndiGo</option>
+              <option value="AI">AI - Air India</option>
+              <option value="IX">IX - Air India Express</option>
+              <option value="UK">UK - Vistara</option>
+              <option value="SG">SG - SpiceJet</option>
+              <option value="I5">I5 - AirAsia India</option>
+              <option value="QP">QP - Akasa Air</option>
+              <option value="S5">S5 - Star Air</option>
+              <option value="G8">G8 - Go First</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dep-time">Departure Time (HHMM)</label>
+            <input id="dep-time" name="DEPARTURE_TIME" type="number" min="0" max="2359" placeholder="e.g. 0745" required />
+          </div>
+          <div class="field">
+            <label for="distance">Route Distance (km)</label>
+            <input id="distance" name="DISTANCE" type="number" min="1" placeholder="e.g. 1148" required />
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn">
+          Predict Delay Probability
+          <span class="spinner"></span>
+        </button>
+      </form>
+
+      <div id="error-msg"></div>
+
+      <div id="result">
+        <div class="result-verdict" id="result-verdict"></div>
+        <div class="result-sub" id="result-sub"></div>
+        <div id="prob-value"></div>
+        <div class="prob-bar-wrap">
+          <div class="prob-bar" id="prob-bar"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = "http://127.0.0.1:8001/predict";
+
+    document.getElementById("predict-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById("submit-btn");
+      const errorEl = document.getElementById("error-msg");
+      const resultEl = document.getElementById("result");
+
+      errorEl.style.display = "none";
+      resultEl.style.display = "none";
+
+      const fields = [
+        { key: "MONTH", label: "Month", int: true },
+        { key: "DAY", label: "Day", int: true },
+        { key: "DAY_OF_WEEK", label: "Day of Week", int: true },
+        { key: "AIRLINE", label: "Airline", int: false },
+        { key: "ORIGIN_AIRPORT", label: "Origin Airport", int: false },
+        { key: "DESTINATION_AIRPORT", label: "Destination Airport", int: false },
+        { key: "DEPARTURE_TIME", label: "Departure Time", int: true },
+        { key: "DISTANCE", label: "Distance", int: true },
+      ];
+
+      const missing = [];
+      const payload = {};
+
+      for (const f of fields) {
+        const inputEl = form.elements[f.key];
+        const raw = inputEl ? inputEl.value.trim() : "";
+        if (!raw) {
+          missing.push(f.label);
+          continue;
+        }
+        if (f.int) {
+          const val = parseInt(raw, 10);
+          if (isNaN(val)) {
+            missing.push(f.label + " (must be a number)");
+            continue;
+          }
+          payload[f.key] = val;
+        } else {
+          payload[f.key] = raw.toUpperCase();
+        }
+      }
+
+      if (!missing.length && payload["ORIGIN_AIRPORT"].length < 3)
+        missing.push("Origin Airport (use a 3-5 letter IATA code)");
+      if (!missing.length && payload["DESTINATION_AIRPORT"].length < 3)
+        missing.push("Destination Airport (use a 3-5 letter IATA code)");
+      if (!missing.length && payload["DEPARTURE_TIME"] > 2359)
+        missing.push("Departure Time (must be between 0000 and 2359)");
+      if (!missing.length && payload["DISTANCE"] <= 0)
+        missing.push("Distance (must be greater than 0)");
+
+      if (missing.length) {
+        errorEl.innerHTML = "<strong>Please fix these fields:</strong><br>- " + missing.join("<br>- ");
+        errorEl.style.display = "block";
+        return;
+      }
+
+      btn.classList.add("loading");
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          let msg = `HTTP ${res.status}`;
+          if (body && body.detail) {
+            if (Array.isArray(body.detail)) {
+              msg = body.detail.map((d) => `${d.loc.slice(1).join(".")}: ${d.msg}`).join("\n");
+            } else {
+              msg = String(body.detail);
+            }
+          }
+          throw new Error(msg);
+        }
+
+        const data = await res.json();
+        showResult(data);
+      } catch (err) {
+        errorEl.style.whiteSpace = "pre-line";
+        errorEl.textContent = "Error: " + err.message;
+        errorEl.style.display = "block";
+      } finally {
+        btn.classList.remove("loading");
+        btn.disabled = false;
+      }
+    });
+
+    function showResult(data) {
+      const pct = Math.round(data.delay_probability * 100);
+      const delayed = data.prediction === "Delayed";
+      const resultEl = document.getElementById("result");
+
+      resultEl.className = delayed ? "delayed" : "ontime";
+      resultEl.style.display = "block";
+
+      document.getElementById("result-verdict").textContent = delayed ? "Delay Risk: High" : "Delay Risk: Low";
+      document.getElementById("result-sub").textContent = delayed
+        ? "This Indian route may face departure delays. Consider buffer time for check-in and connections."
+        : "This Indian route is likely to depart on schedule based on the model signals.";
+      document.getElementById("prob-value").textContent = `${pct}%`;
+
+      requestAnimationFrame(() => {
+        document.getElementById("prob-bar").style.width = pct + "%";
+      });
+
+      resultEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  </script>
+</body>
+</html>
