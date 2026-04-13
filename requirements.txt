@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+imbalanced-learn
+joblib
+fastapi
+uvicorn
+requests
+python-dotenv
+# Optional: install for better model performance
+# xgboost
+# lightgbm
+# shap
